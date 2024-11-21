@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import {
   Accuracy,
   requestForegroundPermissionsAsync,
@@ -8,9 +9,17 @@ import {
 } from 'expo-location';
 
 export default function App() {
+  const initRegion = {
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  }
 
   const [location, setLocation] = useState(null);
   const [ permissionsGranted, setPermissionsGranted ] = useState(false);
+  const [ mapRegion, setMapRegion ] = useState(initRegion);
+
 
   let unsubscribeFromLocation = null;
 
@@ -29,6 +38,11 @@ export default function App() {
     }, location => {
       console.log('received update:', location);
       setLocation(location);
+      setMapRegion({
+        ...mapRegion,
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude
+      })
     });
   }
 
@@ -49,6 +63,13 @@ export default function App() {
           "Location permission not granted."
         }
       </Text>
+
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_GOOGLE} // remove if on IOS and running with EXPO
+        region={mapRegion}
+        showsUserLocation={true}
+      />
     </View>
   );
 }
@@ -62,4 +83,9 @@ const styles = StyleSheet.create({
   paragraph: {
     fontSize: 24
   },
+  map: {
+    flex: 0.5,
+    width: '100%',
+    height: '100%'
+  }
 })
